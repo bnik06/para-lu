@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Para vos 💕</title>
+  <style>
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      font-family: 'Georgia', serif;
+      touch-action: none;
+    }
+
+    #bg-flowers {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      z-index: 0;
+    }
+
+    #ui-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 8vh;
+    }
+
+    #btn-inicio {
+      background: rgba(255, 133, 161, 0.85);
+      border: none;
+      border-radius: 50px;
+      padding: 14px 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(255, 100, 140, 0.5);
+      backdrop-filter: blur(4px);
+      animation: btn-drop-in 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s both,
+                 btn-float   3s ease-in-out                        1.8s infinite;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #btn-inicio:active {
+      transform: scale(0.94);
+      box-shadow: 0 2px 10px rgba(255, 100, 140, 0.4);
+    }
+    #btn-inicio-icon { font-size: 1.5rem; line-height: 1; }
+    #btn-inicio-text {
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    @keyframes btn-drop-in {
+      0%   { opacity: 0; transform: translateY(-40px) scale(0.8); }
+      100% { opacity: 1; transform: translateY(0)     scale(1);   }
+    }
+    @keyframes btn-float {
+      0%,100% { transform: translateY(0px);  }
+      50%      { transform: translateY(-8px); }
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    #overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #ventana {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.7);
+      z-index: 30;
+
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+      padding: 28px 24px 24px;
+      box-shadow: 0 8px 40px rgba(200, 80, 120, 0.25);
+
+      width: min(88vw, 380px);
+      max-height: 85vh;
+      max-height: 85dvh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      text-align: center;
+
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    #ventana.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Scrollbar rosada para textos largos */
+    #ventana::-webkit-scrollbar { width: 4px; }
+    #ventana::-webkit-scrollbar-track { background: transparent; }
+    #ventana::-webkit-scrollbar-thumb { background: #ffb6c8; border-radius: 4px; }
+
+    #ventana-img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 14px;
+      display: none;
+    }
+
+    #ventana-texto {
+      color: #5a2d3a;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    #ventana-subtexto {
+      color: #a07080;
+      font-size: 0.88rem;
+      margin-top: -8px;
+      display: none;
+    }
+
+    #ventana-botones {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      margin-top: auto;
+      padding-top: 4px;
+    }
+
+    .btn-ventana {
+      border: none;
+      border-radius: 50px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.3s;
+      box-shadow: 0 4px 14px rgba(255, 100, 140, 0.3);
+      min-width: 100px;
+    }
+    .btn-ventana:active { transform: scale(0.94); }
+
+    .btn-ventana.primario { background: #ff85a1; color: #fff; }
+    .btn-ventana.primario:active,
+    .btn-ventana.primario.presionado {
+      background: #e05075;
+      box-shadow: 0 2px 8px rgba(200, 50, 90, 0.5);
+    }
+
+    .btn-ventana.si { background: #ff85a1; color: #fff; }
+    .btn-ventana.si:active { background: #e0506e; }
+
+    .btn-ventana.no { background: #f0f0f0; color: #c06080; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn-ventana.no:active { background: #e8e8e8; }
+
+  </style>
+</head>
+<body>
+
+  <iframe id="bg-flowers" src="flores.html" scrolling="no"></iframe>
+
+  <div id="ui-layer">
+    <button id="btn-inicio" onclick="abrirVentana()">
+      <span id="btn-inicio-icon">💌</span>
+      <span id="btn-inicio-text">Para vos</span>
+    </button>
+  </div>
+
+  <div id="overlay"></div>
+
+  <div id="ventana">
+    <img id="ventana-img" src="" alt="">
+    <p  id="ventana-texto"></p>
+    <p  id="ventana-subtexto"></p>
+    <div id="ventana-botones"></div>
+  </div>
+
+
+  <script>
+
+  const pasos = [
+
+    /* ── PASO 0 ── */
+    {
+      imagen:   "imagenes/HAAIIIIIII.jfif",
+      texto:    "Hola lindaaa 🌸",
+      subtexto: "",
+      botones: [{ label: "→", clase: "primario", irA: 1 }]
+    },
+
+    /* ── PASO 1 ── */
+    {
+      imagen:   "fotos/foto1.jpg",
+      texto:    "Cuando te conocí, lo primero que note fue tu sonrisa..",
+      subtexto: "(Una sonrisa dulce la verdad)",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 2 }]
+    },
+
+    /* ── PASO 2 ── */
+    {
+      imagen:   "",
+      texto:    "La primera vez que vi esa sonrisa fue en Edu, aunque no te acuerdes.",
+      subtexto: "",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 3 }]
+    },
+
+    /* ── PASO 3 ── */
+    {
+      imagen:   "imagenes/Shy Embarrassed.jfif",
+      texto:    "Cuando me hablaste pense '¿Quien es esa chica?', whot is that girllll.",
+      subtexto: "",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 4 }]
+    },
+
+    /* ── PASO 4 ── */
+    {
+      imagen:   "",
+      texto:    "Fue una conversacion corta sobre piedras solo porque preguntaste por la piedra que llevaba en la cadenita.",
+      subtexto: "No fue para tanto pero fue lo suficiente para que me empezaras a llamar la atención...",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 5 }]
+    },
+
+    /* ── PASO 5 ── */
+    {
+      imagen:   "imagenes/rizz.jfif",
+      texto:    "Desde ahí creo que te empece a notar en Edu y muy pocas veces en los recreos cuando bajaba a comprar.",
+      subtexto: "",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 6 }]
+    },
+
+    /* ── PASO 6 ── */
+    {
+      imagen:   "",
+      texto:    "Ese día donde fuimos a la charla del colegio, te vi varias veces porque estabas sentada en frente con tu amiga. Cuando termino la charla y tenia que ir cada una a su casa, recuerdo que estaba con mis amixs cuando te acercaste a preguntar por la parada más cercana.",
+      subtexto: "",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 7 }]
+    },
+
+    /* ── PASO 7 ── */
+    {
+      imagen:   "",
+      texto:    "Te juro que cuando hablaste no pense dos veces en contestar, y literal te iba a compañar a alguna parada dejando a mis amigas jsdhsjdh",
+      subtexto: "(actuaba por impulso la loka)",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 8 }]
+    },
+
+    /* ── PASO 8 ── */
+    {
+      imagen:   "imagenes/nae.jfif",
+      texto:    "En mi cabeza muy probablemente estaba modo 'ou yeaa hoy le voy a hablarrr'",
+      subtexto: "Ahora que lo pienso ya me traias de pendeja ahí cuando ni nos hablabamos.",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 9 }]
+    },
+
+    /* ── PASO 9 ── */
+    {
+      imagen:   "",
+      texto:    "Encima cuando te diste la vuelta se me escapo decir practicamente gritando 'pero que HERMOSA que es', vos miraste de costado (no tengo ni la menor idea si de verdad escuchaste o no, pero te reiste igual) y despues te fuiste.",
+      subtexto: "Si mal no me acuerdo ese mismo día me empezaste a seguir en insta.",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 10 }]
+    },
+
+    /* ── PASO 10 ── */
+    {
+      imagen:   "imagenes/not mine.jfif",
+      texto:    "Mi amiga me habia pegado uno por el brazo y me dijo 'boba, como vas a gritar', le respondi '¿que?, si es la verdad, es linda'.",
+      subtexto: "Me vale madreeees yo voy a gritar lo que se me cantaaaa",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 11 }]
+    },
+
+    /* ── PASO 11 ── */
+    {
+      imagen:   "",
+      texto:    "Cuestion, despues empezamos a hablar en insta y me agradabas bastante. De las veces que comenzamos a hablar bastante me empezaste a gustar. Pero nunca llegue a decir nada porque me daba miedo que capaz vos solo me estabas viendo como 'amiga' en ese momento (y si, tampoco es que fueras adivina para saberlo). Y no queria incomodar las cosas diciendo que me gustaabas entonces me calle por bastante tiempo.",
+      subtexto: "",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 12 }]
+    },
+
+    /* ── PASO 12 ── */
+    {
+      imagen:   "imagenes/descarga1.jfif",
+      texto:    "Entonces digo bueno, capaz si pienso en ella como 'amiga' me deje de gustar, MENTIRA. La verdad me seguías gustando, incluso si pasabamos un tiempo sin hablar me llegaba tu mensaje y yo al toque respondia.",
+      subtexto: "Siempre de la correa pues ;-;",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 13 }]
+    },
+
+    /* ── PASO 13 ── */
+    {
+      imagen:   "imagenes/descarga2.jfif",
+      texto:    "Pero yo bien pendeja no decia nada, ademas me habia quedado con la idea de que 'no querias relaciones amorosas'.",
+      subtexto: "Estoy pendeja, pendeja pero por vos",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 14 }]
+    },
+
+    /* ── PASO 14 ── */
+    {
+      imagen:   "imagenes/descarga3.jfif",
+      texto:    "Y despues te me declaraste, me habia paniqueado bien machin. Te juro que no me lo esperaba, en mi cabeza no llegaba a pasar la idea o posibilidad de que te podia llegar a gustar, asi que entre en panico con tú mensaje en las notificaciones.",
+      subtexto: "Por eso las respuestas que te habia dado esa vez y por tarada tambien.",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 15 }]
+    },
+
+    /* ── PASO 15 ── */
+    {
+      imagen:   "imagenes/sobsob.jfif",
+      texto:    "Pero bueno, ya pasamos por eso...",
+      subtexto: "Ay voy a llorar",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 16 }]
+    },
+
+    /* ── PASO 16 ── */
+    {
+      imagen:   "imagenes/𝐓𝐡𝐞 𝐥𝐢𝐭𝐭𝐥𝐞 𝐭𝐡𝐢𝐧𝐠𝐬 𝐢𝐧 𝐥𝐢𝐟𝐞__.jfif",
+      texto:    "Estem si a lo que iba...",
+      subtexto: "",
+      botones: [{ label: "Seguir →", clase: "primario", irA: 17 }]
+    },
+
+    /* ── PASO 17 — LA PREGUNTA ── */
+    {
+      imagen:   "imagenes/jis.jpg",
+      texto:    "¿Querés ser mi novia? 💕",
+      subtexto: "Estas obligada a responder que sí chikistrikis",
+      botones: [
+        {
+          label:     "Sí!!! 💖",
+          clase:     "si",
+          irA:       18,
+          registrar: "si"   // ← manda "Sí" a Google Forms silenciosamente
+        },
+        {
+          label:     "No 😞",
+          clase:     "no",
+          irA:       19,
+          registrar: "no"   // ← manda "No" a Google Forms silenciosamente
+        }
+      ]
+    },
+
+    /* ── PASO 18 — RESPUESTA SÍ ── */
+    {
+      imagen:   "imagenes/descarga4.jfif",
+      texto:    "Sabia que ibas a decir que sí, tkm amorcito <3 💖",
+      subtexto: "Nadie fue obligada a tocar el botón de 'sí'...",
+      botones: [{ label: "💕", clase: "primario", irA: "cerrar" }]
+    },
+
+    /* ── PASO 19 — RESPUESTA NO ── */
+    {
+      imagen:   "imagenes/nuh uh.jfif",
+      texto:    "No era una opción valida, nono, volve.",
+      subtexto: "Volvamos a intentarlo...",
+      botones: [{ label: "← Volver", clase: "primario", irA: 17 }]
+    }
+
+  ];
+
+
+  /* ════════════════════════════════════════════════════════
+     GOOGLE FORMS — envío silencioso en segundo plano
+     Ella no ve nada. Vos ves la respuesta en tu Forms/Sheets.
+  ════════════════════════════════════════════════════════ */
+  const FORM_ID      = "1FAIpQLSf9BwVnxb6iXDOtnOGLZTThdarNRsqQA7c6a7lLBGlNDHk0IQ";
+  const ENTRY_ID     = "entry.794948486";
+  const RESPUESTA_SI = "Sí (dijo que siiiiiiiiiiiii)";
+  const RESPUESTA_NO = "No (pinshe culera, na mentira)";
+
+  function registrarRespuesta(cual) {
+    const valor = cual === "si" ? RESPUESTA_SI : RESPUESTA_NO;
+    const url   = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?${ENTRY_ID}=${encodeURIComponent(valor)}&submit=Submit`;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.name = 'hidden-form-target';
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.target = 'hidden-form-target';
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(() => { iframe.remove(); form.remove(); }, 3000);
+  }
+
+
+  /* ════════════════════════════════════════════════════════
+     LÓGICA — no hace falta tocar esto
+  ════════════════════════════════════════════════════════ */
+  const ventana         = document.getElementById('ventana');
+  const overlay         = document.getElementById('overlay');
+  const btnInicio       = document.getElementById('btn-inicio');
+  const ventanaImg      = document.getElementById('ventana-img');
+  const ventanaTexto    = document.getElementById('ventana-texto');
+  const ventanaSubtexto = document.getElementById('ventana-subtexto');
+  const ventanaBotones  = document.getElementById('ventana-botones');
+
+  function mostrarPaso(numeroPaso) {
+    const paso = pasos[numeroPaso];
+    if (!paso) return;
+
+    // Imagen
+    if (paso.imagen && paso.imagen !== "") {
+      ventanaImg.src = paso.imagen;
+      ventanaImg.style.display = "block";
+    } else {
+      ventanaImg.style.display = "none";
+      ventanaImg.src = "";
+    }
+
+    // Textos
+    ventanaTexto.textContent = paso.texto;
+
+    if (paso.subtexto && paso.subtexto !== "") {
+      ventanaSubtexto.textContent   = paso.subtexto;
+      ventanaSubtexto.style.display = "block";
+    } else {
+      ventanaSubtexto.style.display = "none";
+    }
+
+    // Botones
+    ventanaBotones.innerHTML = "";
+    paso.botones.forEach(btn => {
+      const el = document.createElement('button');
+      el.className   = `btn-ventana ${btn.clase}`;
+      el.textContent = btn.label;
+
+      el.addEventListener('click', () => {
+        el.classList.add('presionado');
+
+        // Si tiene registrar: "si" o "no", manda al Forms
+        if (btn.registrar) registrarRespuesta(btn.registrar);
+
+        setTimeout(() => {
+          if (btn.irA === "cerrar") cerrarVentana();
+          else mostrarPaso(btn.irA);
+        }, 200);
+      });
+
+      ventanaBotones.appendChild(el);
+    });
+
+  }
+
+  function abrirVentana() {
+    mostrarPaso(0);
+    btnInicio.style.opacity       = "0";
+    btnInicio.style.pointerEvents = "none";
+    btnInicio.style.transition    = "opacity 0.3s";
+    overlay.classList.add('visible');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      ventana.classList.add('visible');
+    }));
+  }
+
+  function cerrarVentana() {
+    ventana.classList.remove('visible');
+    overlay.classList.remove('visible');
+    setTimeout(() => {
+      btnInicio.style.opacity       = "1";
+      btnInicio.style.pointerEvents = "auto";
+    }, 400);
+  }
+
+  </script>
+</body>
+</html>
