@@ -392,29 +392,16 @@
      GOOGLE FORMS — envío silencioso en segundo plano
      Ella no ve nada. Vos ves la respuesta en tu Forms/Sheets.
   ════════════════════════════════════════════════════════ */
-  const FORM_ID      = "1FAIpQLSf9BwVnxb6iXDOtnOGLZTThdarNRsqQA7c6a7lLBGlNDHk0IQ";
-  const ENTRY_ID     = "entry.794948486";
-  const RESPUESTA_SI = "Sí (dijo que siiiiiiiiiiiii)";
-  const RESPUESTA_NO = "No (pinshe culera, na mentira)";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr8vC_7ceXG3ZW3576giOkeQdHI4pmSu6qi15ZAyiSfxjmafqIxSWSNWWm5AsW1LYR/exec";
 
-  function registrarRespuesta(cual) {
-    const valor = cual === "si" ? RESPUESTA_SI : RESPUESTA_NO;
-    const url   = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?${ENTRY_ID}=${encodeURIComponent(valor)}&submit=Submit`;
-
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.name = 'hidden-form-target';
-    document.body.appendChild(iframe);
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = url;
-    form.target = 'hidden-form-target';
-    document.body.appendChild(form);
-    form.submit();
-
-    setTimeout(() => { iframe.remove(); form.remove(); }, 3000);
-  }
+function registrarRespuesta(cual) {
+  const valor = cual === "si" ? "Sí (dijo que siiiiiiiiiiiii)" : "No (pinshe culera, na mentira)";
+  const img = document.createElement('img');
+  img.src = `${SCRIPT_URL}?respuesta=${encodeURIComponent(valor)}`;
+  img.style.display = 'none';
+  document.body.appendChild(img);
+  setTimeout(() => img.remove(), 3000);
+}
 
 
   /* ════════════════════════════════════════════════════════
